@@ -151,26 +151,50 @@ def delete(data, key):
 
 
 # Parser
-parser = argparse.ArgumentParser(description="A mini-utility to quickly jot down and recall snippets of code or commands.")
+parser = argparse.ArgumentParser(
+    description="A super mini-utility to store and retrieve random snippets in your terminal!",
+)
+parser.set_defaults(fn=parser.print_help)
 
-sub_parsers = parser.add_subparsers()
+sub_parsers = parser.add_subparsers(metavar='command')
 
-init_parser = sub_parsers.add_parser('init')
+init_parser = sub_parsers.add_parser(
+    'init',
+    help='Re-initialize the data-store. This will ERASE any currently stored data, use with care!',
+)
 init_parser.set_defaults(fn=init)
 
-ls_parser = sub_parsers.add_parser('ls')
+ls_parser = sub_parsers.add_parser(
+    'ls',
+    help='See all stored snippets.',
+)
 ls_parser.set_defaults(fn=ls)
 
-get_parser = sub_parsers.add_parser('get')
+get_parser = sub_parsers.add_parser(
+    'get',
+    help="Retrieve a snippet by it's key",
+)
 get_parser.add_argument('key')
 get_parser.set_defaults(fn=get)
 
-put_parser = sub_parsers.add_parser('put')
-put_parser.add_argument('--key')
-put_parser.add_argument('--value')
+put_parser = sub_parsers.add_parser(
+    'put',
+    help="Store a new key-value pair.",
+)
+put_parser.add_argument(
+    '--key',
+    help="Non-interactive way to set a key.",
+)
+put_parser.add_argument(
+    '--value',
+    help="Non-interactive way to set a value.",
+)
 put_parser.set_defaults(fn=put)
 
-delete_parser = sub_parsers.add_parser('del')
+delete_parser = sub_parsers.add_parser(
+    'del',
+    help="Delete a snippet by it's key",
+)
 delete_parser.add_argument('key')
 delete_parser.set_defaults(fn=delete)
 
