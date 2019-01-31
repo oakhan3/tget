@@ -22,7 +22,7 @@ PATH_EXPORT = '\nPATH="{}:$PATH"\n'.format(INSTALL_PATH)
 
 if __name__ == "__main__":
     # Download qstor script
-    install = os.path.join(EXPANDED_INSTALL_PATH, "qstor")
+    install = os.path.join(EXPANDED_INSTALL_PATH, "qs")
     urlretrieve(QSTOR_URL, install)
 
     # Change install permissions to `rwxr--r--``
