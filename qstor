@@ -69,6 +69,23 @@ def _access_store(fn):
 
 
 # Top-Level Functions
+def init():
+    _safe_write({})
+    sys.exit()
+
+
+@_access_store
+def ls(data):
+    LS_DIVIDER = "-" * 40
+
+    for key, value in data.items():
+        print("\n")
+        print(key + ":\n" + LS_DIVIDER)
+        print(value)
+
+    sys.exit()
+
+
 @_access_store
 def get(data, key):
     value = data.get(key)
@@ -116,23 +133,6 @@ def put(data, key, value):
     _safe_write(data)
 
     print("STORED")
-    sys.exit()
-
-
-@_access_store
-def ls(data):
-    LS_DIVIDER = "-" * 40
-
-    for key, value in data.items():
-        print("\n")
-        print(key + ":\n" + LS_DIVIDER)
-        print(value)
-
-    sys.exit()
-
-
-def init():
-    _safe_write({})
     sys.exit()
 
 
