@@ -25,6 +25,9 @@ if __name__ == "__main__":
     install = os.path.join(EXPANDED_INSTALL_PATH, "qstor")
     urlretrieve(QSTOR_URL, install)
 
+    # Change install permissions to `rwxr--r--``
+    os.chmod(install, 0o744)
+
     if EXPANDED_INSTALL_PATH in ENV_PATHS:
         print('Installed, try a `qstor` command right away!')
         sys.exit()
