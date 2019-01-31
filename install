@@ -1,0 +1,58 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+if sys.version_info[0] < 3:
+    from urllib import urlretrieve
+else:
+    from urllib.request import urlretrieve
+
+
+QSTOR_URL = "https://raw.githubusercontent.com/oakhan3/qstor/master/qstor"
+
+INSTALL_PATH = "$HOME/.local/bin"
+EXPANDED_INSTALL_PATH = os.path.expandvars(INSTALL_PATH)
+
+ENV_PATHS = os.environ['PATH'].split(":")
+ENV_SHELL = os.environ['SHELL']
+
+PATH_EXPORT = '\nPATH="{}:$PATH"\n'.format(INSTALL_PATH)
+
+
+if __name__ == "__main__":
+    # Download qstor script
+    install = os.path.join(EXPANDED_INSTALL_PATH, "qstor")
+    urlretrieve(QSTOR_URL, install)
+
+    if EXPANDED_INSTALL_PATH in ENV_PATHS:
+        print('Installed, try a `qstor` command right away!')
+        sys.exit()
+
+    # Automatically add the INSTALL_PATH to shell config if possible.
+    shell_config_path = None
+
+    home_dir = os.path.expandvars("$HOME")
+    shell_config_map = {
+        "zsh": os.path.join(home_dir, ".zshrc",),
+        "bash": os.path.join(home_dir, ".bash_profile"),
+    }
+
+    for shell in shell_config_map:
+        if shell in ENV_SHELL:
+            shell_config_path = shell_config_map[shell]
+            break
+
+    if shell_config_path:
+        with open(shell_config_path, "a") as shell_config:
+            shell_config.write(PATH_EXPORT)
+
+        print("Added the following to your `{}`:\n{}".format(shell_config_path, PATH_EXPORT))
+    else:
+        print(
+            "Add the following to your shell config file (.bashrc, .bash_profile...) "
+            "to enable the `qstor` command throughout:{}"
+            .format(PATH_EXPORT)
+        )
+
+    print("Make sure to restart your shell to enable `qstor` commands!")
