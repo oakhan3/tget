@@ -136,6 +136,20 @@ def init():
     sys.exit()
 
 
+@_access_store
+def delete(data, key):
+    try:
+        value = data.pop(key)
+    except KeyError:
+        print('\nNothing found')
+        sys.exit(1)
+
+    _safe_write(data)
+
+    print("The following value (with key `" + key + "`) was popped:\n\n" + value)
+    sys.exit()
+
+
 # Parser
 parser = argparse.ArgumentParser(description="A mini-utility to quickly jot down and recall snippets of code or commands.")
 
@@ -155,6 +169,10 @@ put_parser = sub_parsers.add_parser('put')
 put_parser.add_argument('--key')
 put_parser.add_argument('--value')
 put_parser.set_defaults(fn=put)
+
+delete_parser = sub_parsers.add_parser('del')
+delete_parser.add_argument('key')
+delete_parser.set_defaults(fn=delete)
 
 
 if __name__ == "__main__":
