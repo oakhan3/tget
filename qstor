@@ -1,0 +1,168 @@
+#!/usr/bin/env python
+
+# -*- coding: utf-8 -*-
+
+import argparse
+import json
+import logging
+import os
+import sys
+import io
+import functools
+
+if sys.version_info[0] < 3:
+    input = raw_input  # noqa:F821
+    to_unicode = unicode  # noqa:F821
+else:
+    to_unicode = str
+
+
+# Setup Logging
+logging.basicConfig(
+    level=logging.WARNING,
+    format="%(name)-12s: %(levelname)-8s %(message)s",
+)
+
+logger = logging.getLogger('qstor')
+
+
+# Dirs
+HOME_DIR = os.path.expanduser("~")
+CONFIG_DIR = os.path.join(HOME_DIR, ".qstor")
+CONFIG = os.path.join(CONFIG_DIR, "config.toml")
+STORE = os.path.join(CONFIG_DIR, "store.json")
+
+
+# Internal Functions
+def _safe_write(data):
+    with io.open(STORE, 'w', encoding='utf8') as outfile:
+        data_str = json.dumps(
+            data,
+            indent=4,
+            separators=(',', ': '),
+        )
+        outfile.write(to_unicode(data_str))
+
+
+def _access_store(fn):
+    """Add a `data` positional arg to the decorated function.
+    """
+    @functools.wraps(fn)
+    def wrapped(*args, **kwargs):
+        if not os.path.exists(STORE):
+            _safe_write({})
+
+        try:
+            with open(STORE) as file_:
+                data = json.load(file_)
+        except ValueError:
+            logger.warning(
+                "Unable to access the `store` located at `%s`, the file may be corrupted! "
+                "To recreate it anew, run the `qstor init` command!",
+                STORE,
+            )
+            sys.exit(1)
+
+        return fn(data, *args, **kwargs)
+
+    return wrapped
+
+
+# Top-Level Functions
+@_access_store
+def get(data, key):
+    value = data.get(key)
+
+    if value is None:
+        print('\nNothing found')
+        sys.exit(1)
+
+    print("\n" + value)
+    sys.exit()
+
+
+@_access_store
+def put(data, key, value):
+    if key is None:
+        key = input('Key: ')
+
+    if not key:
+        logger.warning("Bad Key!")
+        sys.exit(1)
+
+    if value is None:
+        print('Value:\n')
+        value = ''
+        current_value = None
+        previous_value = None
+        while True:
+            if current_value == '' and previous_value == '':
+                break
+
+            current_value = input()
+            value += current_value
+            value += '\n'
+            previous_value = current_value
+
+        # Remove `\n\n` from the value.
+        value = value[:-2]
+
+        if not value:
+            logger.warning("Bad Value!")
+            sys.exit(1)
+
+    data[key] = value.strip()
+
+    _safe_write(data)
+
+    print("STORED")
+    sys.exit()
+
+
+@_access_store
+def ls(data):
+    LS_DIVIDER = "-" * 40
+
+    for key, value in data.items():
+        print("\n")
+        print(key + ":\n" + LS_DIVIDER)
+        print(value)
+
+    sys.exit()
+
+
+def init():
+    _safe_write({})
+    sys.exit()
+
+
+# Parser
+parser = argparse.ArgumentParser(description="A mini-utility to quickly jot down and recall snippets of code or commands.")
+
+sub_parsers = parser.add_subparsers()
+
+init_parser = sub_parsers.add_parser('init')
+init_parser.set_defaults(fn=init)
+
+ls_parser = sub_parsers.add_parser('ls')
+ls_parser.set_defaults(fn=ls)
+
+get_parser = sub_parsers.add_parser('get')
+get_parser.add_argument('key')
+get_parser.set_defaults(fn=get)
+
+put_parser = sub_parsers.add_parser('put')
+put_parser.add_argument('--key')
+put_parser.add_argument('--value')
+put_parser.set_defaults(fn=put)
+
+
+if __name__ == "__main__":
+    if not os.path.isdir(CONFIG_DIR):
+        os.mkdir(CONFIG_DIR)
+
+    args = vars(parser.parse_args())
+
+    fn = args.pop('fn')
+
+    fn(**args)
