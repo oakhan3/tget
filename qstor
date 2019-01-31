@@ -58,7 +58,7 @@ def _access_store(fn):
         except ValueError:
             logger.warning(
                 "Unable to access the `store` located at `%s`, the file may be corrupted! "
-                "To recreate it anew, run the `qstor init` command!",
+                "To recreate it anew, run the `qstor reset` command!",
                 STORE,
             )
             sys.exit(1)
@@ -69,11 +69,6 @@ def _access_store(fn):
 
 
 # Top-Level Functions
-def init():
-    _safe_write({})
-    sys.exit()
-
-
 @_access_store
 def ls(data):
     LS_DIVIDER = "-" * 40
@@ -150,6 +145,11 @@ def delete(data, key):
     sys.exit()
 
 
+def reset():
+    _safe_write({})
+    sys.exit()
+
+
 # Parser
 parser = argparse.ArgumentParser(
     description="A super mini-utility to store and retrieve random snippets in your terminal!",
@@ -157,12 +157,6 @@ parser = argparse.ArgumentParser(
 parser.set_defaults(fn=parser.print_help)
 
 sub_parsers = parser.add_subparsers(metavar='command')
-
-init_parser = sub_parsers.add_parser(
-    'init',
-    help='Re-initialize the data-store. This will ERASE any currently stored data, use with care!',
-)
-init_parser.set_defaults(fn=init)
 
 ls_parser = sub_parsers.add_parser(
     'ls',
@@ -197,6 +191,12 @@ delete_parser = sub_parsers.add_parser(
 )
 delete_parser.add_argument('key')
 delete_parser.set_defaults(fn=delete)
+
+reset_parser = sub_parsers.add_parser(
+    'reset',
+    help='Re-initialize the data-store. This will ERASE any currently stored data, use with care!',
+)
+reset_parser.set_defaults(fn=reset)
 
 
 if __name__ == "__main__":
