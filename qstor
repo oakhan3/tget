@@ -4,7 +4,6 @@
 
 import argparse
 import json
-import logging
 import os
 import sys
 import io
@@ -15,15 +14,6 @@ if sys.version_info[0] < 3:
     to_unicode = unicode  # noqa:F821
 else:
     to_unicode = str
-
-
-# Setup Logging
-logging.basicConfig(
-    level=logging.WARNING,
-    format="%(name)-12s: %(levelname)-8s %(message)s",
-)
-
-logger = logging.getLogger('qstor')
 
 
 # Dirs
@@ -56,11 +46,9 @@ def _access_store(fn):
             with open(STORE) as file_:
                 data = json.load(file_)
         except ValueError:
-            logger.warning(
-                "Unable to access the `store` located at `%s`, the file may be corrupted! "
-                "To recreate it anew, run the `qstor reset` command!",
-                STORE,
-            )
+            print("\nUnable to access the `store` - the file may be corrupted!")
+            print("To recreate it anew, run the `qstor reset` command.")
+            print("Store location: {}".format(STORE))
             sys.exit(1)
 
         return fn(data, *args, **kwargs)
@@ -99,7 +87,7 @@ def put(data, key, value):
         key = input('Key: ')
 
     if not key:
-        logger.warning("Bad Key!")
+        print("\nBad Key!")
         sys.exit(1)
 
     if value is None:
@@ -119,9 +107,9 @@ def put(data, key, value):
         # Remove `\n\n` from the value.
         value = value[:-2]
 
-        if not value:
-            logger.warning("Bad Value!")
-            sys.exit(1)
+    if not value:
+        print("Bad Value!")
+        sys.exit(1)
 
     data[key] = value.strip()
 
@@ -141,7 +129,7 @@ def delete(data, key):
 
     _safe_write(data)
 
-    print("The following value (with key `" + key + "`) was popped:\n\n" + value)
+    print("\nThe following value (with key `" + key + "`) was deleted:\n\n" + value)
     sys.exit()
 
 
@@ -158,11 +146,13 @@ parser.set_defaults(fn=parser.print_help)
 
 sub_parsers = parser.add_subparsers(metavar='command')
 
+
 ls_parser = sub_parsers.add_parser(
     'ls',
     help='See all stored snippets.',
 )
 ls_parser.set_defaults(fn=ls)
+
 
 get_parser = sub_parsers.add_parser(
     'get',
@@ -170,6 +160,7 @@ get_parser = sub_parsers.add_parser(
 )
 get_parser.add_argument('key')
 get_parser.set_defaults(fn=get)
+
 
 put_parser = sub_parsers.add_parser(
     'put',
@@ -185,12 +176,14 @@ put_parser.add_argument(
 )
 put_parser.set_defaults(fn=put)
 
+
 delete_parser = sub_parsers.add_parser(
     'del',
     help="Delete a snippet by it's key",
 )
 delete_parser.add_argument('key')
 delete_parser.set_defaults(fn=delete)
+
 
 reset_parser = sub_parsers.add_parser(
     'reset',
