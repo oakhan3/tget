@@ -92,7 +92,7 @@ def put(data, key, value):
         current_value = None
         previous_value = None
         while True:
-            if current_value == " and previous_value == ":
+            if current_value == "" and previous_value == "":
                 break
 
             current_value = input()
