@@ -2,13 +2,54 @@
 
 A super mini-utility to store and retrieve random snippets in your terminal!
 
-## install
+## Install
 
-    curl http://raw.githubusercontent.com/oakhan3/tget/master/install | python
+    curl https://raw.githubusercontent.com/oakhan3/tget/master/install | python
 
-It's simple...
+## But why?
 
-## put something
+I found myself storing snippets of commands, code and unicode in random files, gists, or terminal reverse search, only to lose it or forget how or why I stored it there.
+
+Some examples:
+
+* Cryptic `sed` commands I would pipe log streams into:
+
+      $ tg sed-nl
+
+      | sed -i 's/\\n/\n/g'
+
+* Unicode!
+
+      $ tg squiggly-n
+
+      ñ
+
+* Arbritary things I would google EVERYTIME otherwise
+
+      $ tg pg-uri
+
+      postgresql://user:password@host:port/dbname
+
+* Project specific things that don't warrant their own aliases and tend to get lost in reverse search
+
+      $ `tg dru-log`  // This evaluates "docker-compose logs --tail 15 -f under-dg-rabbit"
+      ...
+      under-dg-rabbit_2  |  completed with 3 plugins.
+      under-dg-rabbit_2  | 2018-03-03 14:02:01.377 [info] <0.5.0> Server startup complete; 3 plugins   started.
+      under-dg-rabbit_1  |  * rabbitmq_management
+      under-dg-rabbit_1  |  * rabbitmq_web_dispatch
+      under-dg-rabbit_3  |  * rabbitmq_management_agent
+      ...
+
+## Notes
+
+* Values are stored as plain-text so this is NOT a tool to store any form of sensitive data like passwords.
+* You can find the stored values in a json file located at `~/.tget/store.json`
+* Currently only supports Unix-like Operating Systems.
+
+## Commands
+
+### put
 
     $ tg put
     Key: abra
@@ -18,13 +59,13 @@ It's simple...
 
     STORED
 
-## get something
+### get
 
     $ tg abra
 
     cadabra
 
-## see all the things
+### ls
 
     $ tg ls
 
@@ -53,7 +94,7 @@ It's simple...
     ----------------------------------------
     cadabra
 
-## delete something
+### del
 
     $ tg del abra
 
@@ -61,9 +102,9 @@ It's simple...
 
     cadabra
 
-## extra goodies:
+## Extra Goodies
 
-### multi-line value support
+### Multi-line Value Support
 
     $ tg put
     Key: cow
@@ -99,7 +140,7 @@ It's simple...
                                                             (__)\       )\/
                                                                 ||     ||
 
-### unicode support
+### Unicode support
 
     $ tg put
     Key: feels
@@ -118,44 +159,12 @@ It's simple...
     $ tg put --key hello --value world
     STORED
 
-## but why?
-
-Personally, because I found myself storing snippets of commands, code and unicode in random files, gists or the terminals reverse search, only to lose it or forget how or why I stored it there.
-
-Some examples:
-
-* Cryptic `sed` commands I would pipe log streams into:
-
-      $ tg sed-nl
-
-      | sed -i 's/\\n/\n/g'
-
-* Unicode!
-
-      $ tg squiggly-n
-
-      ñ
-
-* Arbritary things I would google EVERYTIME otherwise
-
-      $ tg pg-uri
-
-      postgresql://user:password@host:port/dbname
-
-* Project specific things that don't warrant their own aliases and tend to get lost in reverse history
-
-      $ `tg dru-log`  // This evaluates "docker-compose logs --tail 15 -f under-dg-rabbit"
-      ...
-      under-dg-rabbit_2  |  completed with 3 plugins.
-      under-dg-rabbit_2  | 2018-03-03 14:02:01.377 [info] <0.5.0> Server startup complete; 3 plugins   started.
-      under-dg-rabbit_1  |  * rabbitmq_management
-      under-dg-rabbit_1  |  * rabbitmq_web_dispatch
-      under-dg-rabbit_3  |  * rabbitmq_management_agent
-      ...
-
-## coming soon
+## Coming soon
 
 * configuration
 * Interactive deleter
 * `ls` sort
 * `ls` search
+* `upgrade` command
+* `export` command
+* `uninstall` command
