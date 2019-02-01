@@ -43,9 +43,10 @@ Some examples:
 
 ## Notes
 
-* Values are stored as plain-text so this is NOT a tool to store any form of sensitive data like passwords.
-* You can find the stored values in a json file located at `~/.tget/store.json`
 * Currently only supports Unix-like Operating Systems.
+* Values are stored as plain-text so this is NOT a tool to store any form of sensitive data like passwords.
+* Data is stored and retrieved from a json-file - don't expect to store/retrieve any form of large data reliably or with high performance.
+* You can find the stored values in a json file located at `~/.tget/store.json`
 
 ## Commands
 
@@ -166,5 +167,5 @@ Some examples:
 * `ls` sort
 * `ls` search
 * `upgrade` command
-* `export` command
+* `import`, `export` commands
 * `uninstall` command
