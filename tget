@@ -128,7 +128,7 @@ def get(data, key, execute, priority_vars):
 @_access_store
 def put(data, key, value):
     if key is None:
-        _echo("Key: ", post_nl=False, flush=True)
+        _echo("Key: ", pre_nl=True, post_nl=False, flush=True)
         key = input()
 
     if not key:
@@ -179,10 +179,17 @@ def delete(data, key):
 
 
 def reset():
-    _safe_write({})
+    _echo(
+        "This will ERASE any currently stored data, type 'RESET' to confirm: ", pre_nl=True, post_nl=False, flush=True
+    )
 
+    value = input()
 
-description = "A super mini-utility to store and retrieve random snippets in your terminal!"
+    if value == "RESET":
+        _safe_write({})
+        _echo("Deleted all stored key-value pairs.", pre_nl=True)
+    else:
+        _echo("Aborted.", pre_nl=True)
 
 # Individual GET Parser
 get_parser = argparse.ArgumentParser(prog="tg", description=description)
