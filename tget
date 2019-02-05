@@ -95,7 +95,7 @@ def ls(data):
 
 
 @_access_store
-def get(data, key):
+def get(data, key, execute):
     value = data.get(key)
 
     if value is None:
@@ -110,6 +110,9 @@ def get(data, key):
             value = value.replace(env_var, os.environ[no_dollar_env_var])
 
     _echo(value, pre_nl=True)
+
+    if execute:
+        print(value)
 
 
 @_access_store
@@ -174,6 +177,7 @@ description = "A super mini-utility to store and retrieve random snippets in you
 # Individual GET Parser
 get_parser = argparse.ArgumentParser(description=description)
 get_parser.add_argument('key', metavar='KEY')
+get_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.', dest='execute', action='store_true')
 
 # Main Parser
 parser = argparse.ArgumentParser(description=description)
@@ -185,6 +189,7 @@ key_parser = sub_parsers.add_parser(
     help="Retrieve the key's value, NOTE: pass the '-e' option to execute the retrieved value in the current shell.",
 )
 key_parser.add_argument('key')
+key_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.')
 
 # PUT
 put_parser = sub_parsers.add_parser(
