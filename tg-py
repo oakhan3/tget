@@ -70,7 +70,7 @@ def ls(data):
 
 
 @access_store
-def get(data, key, execute, priority_vars):
+def get(data, key, execute, verbose, priority_vars):
     value = data.get(key)
 
     if value is None:
@@ -95,7 +95,8 @@ def get(data, key, execute, priority_vars):
         if no_dollar_value_placeholder in os.environ:
             value = value.replace(value_placeholder, os.environ[no_dollar_value_placeholder])
 
-    _echo(value, pre_nl=True)
+    if not execute or verbose:
+        _echo(value, pre_nl=True)
 
     if execute:
         print(value)
@@ -242,6 +243,13 @@ def _add_get_parser_args(parser):
         "--exec",
         help="Execute the retrieved value in the current shell.",
         dest="execute",
+        action="store_true",
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        help="Echo the executed command when the '-e' option is passed",
+        dest="verbose",
         action="store_true",
     )
     parser.add_argument(
