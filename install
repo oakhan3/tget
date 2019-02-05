@@ -18,19 +18,20 @@ ENV_PATHS = os.environ['PATH'].split(":")
 ENV_SHELL = os.environ['SHELL']
 
 PATH_EXPORT = '\nPATH="{}:$PATH"\n'.format(INSTALL_PATH)
+SHELL_FN = """
+tg() {
+    tg-py "$@" | source /dev/stdin
+}
+"""
 
 
 if __name__ == "__main__":
     # Download tget script
-    install = os.path.join(EXPANDED_INSTALL_PATH, "tg")
+    install = os.path.join(EXPANDED_INSTALL_PATH, "tg-py")
     urlretrieve(TGET_URL, install)
 
     # Change install permissions to `rwxr--r--``
     os.chmod(install, 0o744)
-
-    if EXPANDED_INSTALL_PATH in ENV_PATHS:
-        print('Installed, try a `tg` command right away!')
-        sys.exit()
 
     # Automatically add the INSTALL_PATH to shell config if possible.
     shell_config_path = None
@@ -48,14 +49,25 @@ if __name__ == "__main__":
 
     if shell_config_path:
         with open(shell_config_path, "a") as shell_config:
-            shell_config.write(PATH_EXPORT)
+            shell_config.write(SHELL_FN)
+            print("Added the following to your `{}`:\n{}".format(shell_config_path, SHELL_FN))
 
-        print("Added the following to your `{}`:\n{}".format(shell_config_path, PATH_EXPORT))
+            if EXPANDED_INSTALL_PATH not in ENV_PATHS:
+                shell_config.write(PATH_EXPORT)
+                print("Added the following to your `{}`:\n{}".format(shell_config_path, PATH_EXPORT))
+
+        print('Installed, try a `tg` command right away!')
+
     else:
         print(
             "Add the following to your shell config file (.bashrc, .bash_profile...) "
-            "to enable the `tg` command throughout:{}"
-            .format(PATH_EXPORT)
+            "to enable the `tg` command throughout:{}{}"
+            .format(
+                PATH_EXPORT,
+                SHELL_FN,
+            )
         )
 
-    print("Make sure to restart your shell to enable `tg` commands!")
+        print("Make sure to restart your shell to enable `tg` commands!")
+
+    sys.exit()
