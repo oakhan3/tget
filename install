@@ -9,7 +9,7 @@ else:
     from urllib.request import urlretrieve
 
 
-TGET_URL = "https://raw.githubusercontent.com/oakhan3/tget/master/tget"
+TGET_URL = "https://raw.githubusercontent.com/oakhan3/tget/master/tg-py"
 
 INSTALL_PATH = "$HOME/.local/bin"
 EXPANDED_INSTALL_PATH = os.path.expandvars(INSTALL_PATH)
