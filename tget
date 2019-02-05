@@ -169,28 +169,24 @@ def reset():
     _safe_write({})
 
 
-# Parser
-parser = argparse.ArgumentParser(
-    description="A super mini-utility to store and retrieve random snippets in your terminal!",
-)
+description = "A super mini-utility to store and retrieve random snippets in your terminal!"
+
+# Individual GET Parser
+get_parser = argparse.ArgumentParser(description=description)
+get_parser.add_argument('key', metavar='KEY')
+
+# Main Parser
+parser = argparse.ArgumentParser(description=description)
 sub_parsers = parser.add_subparsers(metavar="command")
 
-
-ls_parser = sub_parsers.add_parser(
-    "ls",
-    help="See all stored snippets.",
+# GET: This sub-parser is never actually used, it only serves to automatically produce documentation for the main parser.
+key_parser = sub_parsers.add_parser(
+    "<KEY>",
+    help="Retrieve the key's value, NOTE: pass the '-e' option to execute the retrieved value in the current shell.",
 )
-ls_parser.set_defaults(fn=ls)
+key_parser.add_argument('key')
 
-
-get_parser = sub_parsers.add_parser(
-    "get",
-    help="Retrieve a snippet by it's key",
-)
-get_parser.add_argument("key")
-get_parser.set_defaults(fn=get)
-
-
+# PUT
 put_parser = sub_parsers.add_parser(
     "put",
     help="Store a new key-value pair.",
@@ -205,20 +201,34 @@ put_parser.add_argument(
 )
 put_parser.set_defaults(fn=put)
 
-
+# DEL
 delete_parser = sub_parsers.add_parser(
     "del",
     help="Delete a snippet by it's key",
 )
 delete_parser.add_argument("key")
 delete_parser.set_defaults(fn=delete)
+# LS
+ls_parser = sub_parsers.add_parser(
+    "ls",
+    help="See all stored snippets.",
+)
+ls_parser.set_defaults(fn=ls)
 
-
+# RESET
 reset_parser = sub_parsers.add_parser(
     "reset",
     help="Re-initialize the data-store. This will ERASE any currently stored data, use with care!",
 )
 reset_parser.set_defaults(fn=reset)
+
+
+_echo_help(get_parser)
+_echo_help(parser)
+_echo_help(put_parser)
+_echo_help(delete_parser)
+_echo_help(ls_parser)
+_echo_help(reset_parser)
 
 
 if __name__ == "__main__":
@@ -231,24 +241,24 @@ if __name__ == "__main__":
 
     args = sys.argv[1:]
 
-    if not len(args):
-        parser.print_help()
-        sys.exit(1)
+    if len(args):
+        if args[0] in {
+            "ls",
+            "put",
+            "del",
+            "reset",
+            "-h",
+            "--help",
+        }:
+            main_args = vars(parser.parse_args(args))
+            fn = main_args.pop("fn")
+            fn(**main_args)
+            sys.exit()
 
-    if args[0] in {
-        "ls",
-        "get",
-        "put",
-        "del",
-        "reset",
-        "-h",
-        "--help",
-    }:
-        main_args = vars(parser.parse_args(args))
-        fn = main_args.pop("fn")
-        fn(**main_args)
+        get_args = vars(get_parser.parse_args(args))
+        get(**get_args)
         sys.exit()
 
-    key = " ".join(args)
-    get(key)
-    sys.exit()
+    else:
+        parser.print_help()
+        sys.exit(1)
