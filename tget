@@ -10,6 +10,7 @@ import os
 import sys
 import io
 import functools
+import re
 
 if sys.version_info[0] < 3:
     import ConfigParser as configparser
@@ -100,6 +101,13 @@ def get(data, key):
     if value is None:
         _echo('Nothing found', pre_nl=True)
         sys.exit(1)
+
+    env_vars = set(re.findall(r'\$\w+', value))
+
+    for env_var in env_vars:
+        no_dollar_env_var = env_var[1:]
+        if no_dollar_env_var in os.environ:
+            value = value.replace(env_var, os.environ[no_dollar_env_var])
 
     _echo(value, pre_nl=True)
 
