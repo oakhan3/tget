@@ -95,19 +95,32 @@ def ls(data):
 
 
 @_access_store
-def get(data, key, execute):
+def get(data, key, execute, priority_vars):
     value = data.get(key)
 
     if value is None:
         _echo('Nothing found', pre_nl=True)
         sys.exit(1)
 
-    env_vars = set(re.findall(r'\$\w+', value))
+    value_placeholders = set(re.findall(r'\$\w+', value))
 
-    for env_var in env_vars:
-        no_dollar_env_var = env_var[1:]
-        if no_dollar_env_var in os.environ:
-            value = value.replace(env_var, os.environ[no_dollar_env_var])
+    try:
+        priority_var_map = dict(
+            priority_var.split('=', 1) for priority_var in priority_vars
+        )
+    except ValueError:
+        _echo("Passed in ENV-VARs must be in the 'ENVVAR=value' form.")
+        sys.exit(1)
+
+    for value_placeholder in value_placeholders:
+        no_dollar_value_placeholder = value_placeholder[1:]
+
+        if no_dollar_value_placeholder in priority_var_map:
+            value = value.replace(value_placeholder, priority_var_map[no_dollar_value_placeholder])
+            continue
+
+        if no_dollar_value_placeholder in os.environ:
+            value = value.replace(value_placeholder, os.environ[no_dollar_value_placeholder])
 
     _echo(value, pre_nl=True)
 
@@ -175,21 +188,23 @@ def reset():
 description = "A super mini-utility to store and retrieve random snippets in your terminal!"
 
 # Individual GET Parser
-get_parser = argparse.ArgumentParser(description=description)
+get_parser = argparse.ArgumentParser(prog='tg', description=description)
 get_parser.add_argument('key', metavar='KEY')
 get_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.', dest='execute', action='store_true')
+get_parser.add_argument('priority_vars', metavar='ENVVAR=value', nargs='*', help='Optional Environment Variables to interpolate into the output.')
 
 # Main Parser
-parser = argparse.ArgumentParser(description=description)
+parser = argparse.ArgumentParser(prog='tg', description=description)
 sub_parsers = parser.add_subparsers(metavar="command")
 
 # GET: This sub-parser is never actually used, it only serves to automatically produce documentation for the main parser.
 key_parser = sub_parsers.add_parser(
-    "<KEY>",
-    help="Retrieve the key's value, NOTE: pass the '-e' option to execute the retrieved value in the current shell.",
+    "KEY",
+    help="Retrieve the key's value.",
 )
 key_parser.add_argument('key')
 key_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.')
+key_parser.add_argument('priority_vars', metavar='ENVVAR=value', nargs='*', help='Optional Environment Variables to interpolate into the output.')
 
 # PUT
 put_parser = sub_parsers.add_parser(
@@ -213,6 +228,7 @@ delete_parser = sub_parsers.add_parser(
 )
 delete_parser.add_argument("key")
 delete_parser.set_defaults(fn=delete)
+
 # LS
 ls_parser = sub_parsers.add_parser(
     "ls",
