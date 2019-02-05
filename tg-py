@@ -31,6 +31,9 @@ STORE = os.path.join(CONFIG_DIR, "store.json")
 config = configparser.SafeConfigParser()
 config.read(CONFIG)
 
+TOP_LEVEL_COMMANDS = {"ls", "put", "del", "reset", "-h", "--help"}
+PROTECTED_COMMANDS = TOP_LEVEL_COMMANDS.union({"KEY"})
+
 
 def access_store(fn):
     """Add a `data` positional arg to the decorated function.
@@ -55,7 +58,6 @@ def access_store(fn):
     return wrapped
 
 
-# Top-Level Functions
 @access_store
 def ls(data):
     DIVIDER = "-" * 40
@@ -108,7 +110,7 @@ def put(data, key, value):
         _echo("Key: ", pre_nl=True, post_nl=False, flush=True)
         key = input()
 
-    if not key:
+    if not key or key in PROTECTED_COMMANDS:
         _echo("Bad Key!", pre_nl=True)
         sys.exit(1)
 
@@ -279,7 +281,7 @@ if __name__ == "__main__":
     args = sys.argv[1:]
 
     if len(args):
-        if args[0] in {"ls", "put", "del", "reset", "-h", "--help"}:
+        if args[0] in TOP_LEVEL_COMMANDS:
             parsed_args = vars(main_parser.parse_args(args))
             fn = parsed_args.pop("fn")
             fn(**parsed_args)
