@@ -14,8 +14,8 @@ TGET_URL = "https://raw.githubusercontent.com/oakhan3/tget/master/tget"
 INSTALL_PATH = "$HOME/.local/bin"
 EXPANDED_INSTALL_PATH = os.path.expandvars(INSTALL_PATH)
 
-ENV_PATHS = os.environ['PATH'].split(":")
-ENV_SHELL = os.environ['SHELL']
+ENV_PATHS = os.environ["PATH"].split(":")
+ENV_SHELL = os.environ["SHELL"]
 
 PATH_EXPORT = '\nPATH="{}:$PATH"\n'.format(INSTALL_PATH)
 SHELL_FN = """
@@ -37,10 +37,7 @@ if __name__ == "__main__":
     shell_config_path = None
 
     home_dir = os.path.expandvars("$HOME")
-    shell_config_map = {
-        "zsh": os.path.join(home_dir, ".zshrc",),
-        "bash": os.path.join(home_dir, ".bash_profile"),
-    }
+    shell_config_map = {"zsh": os.path.join(home_dir, ".zshrc"), "bash": os.path.join(home_dir, ".bash_profile")}
 
     for shell in shell_config_map:
         if shell in ENV_SHELL:
@@ -56,16 +53,12 @@ if __name__ == "__main__":
                 shell_config.write(PATH_EXPORT)
                 print("Added the following to your `{}`:\n{}".format(shell_config_path, PATH_EXPORT))
 
-        print('Installed, try a `tg` command right away!')
+        print("Installed, try a `tg` command right away!")
 
     else:
         print(
             "Add the following to your shell config file (.bashrc, .bash_profile...) "
-            "to enable the `tg` command throughout:{}{}"
-            .format(
-                PATH_EXPORT,
-                SHELL_FN,
-            )
+            "to enable the `tg` command throughout:{}{}".format(PATH_EXPORT, SHELL_FN)
         )
 
         print("Make sure to restart your shell to enable `tg` commands!")

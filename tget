@@ -5,18 +5,20 @@
 from __future__ import print_function
 
 import argparse
+import functools
+import io
 import json
 import os
-import sys
-import io
-import functools
 import re
+import sys
 
 if sys.version_info[0] < 3:
     import ConfigParser as configparser
+
     input = raw_input  # noqa:F821
 else:
     import configparser
+
     unicode = str
 
 
@@ -33,17 +35,14 @@ config.read(CONFIG)
 # Internal Functions
 def _safe_write(data):
     with io.open(STORE, "w", encoding="utf8") as outfile:
-        data_str = json.dumps(
-            data,
-            indent=4,
-            separators=(",", ": "),
-        )
+        data_str = json.dumps(data, indent=4, separators=(",", ": "))
         outfile.write(unicode(data_str))
 
 
 def _access_store(fn):
     """Add a `data` positional arg to the decorated function.
     """
+
     @functools.wraps(fn)
     def wrapped(*args, **kwargs):
         if not os.path.exists(STORE):
@@ -65,12 +64,12 @@ def _access_store(fn):
 
 def _echo(value, pre_nl=False, post_nl=True, flush=False):
     if pre_nl:
-        print('echo')
+        print("echo")
 
     print('echo "' + value + '"')
 
     if post_nl:
-        print('echo')
+        print("echo")
 
     if flush:
         sys.stdout.flush()
@@ -99,15 +98,13 @@ def get(data, key, execute, priority_vars):
     value = data.get(key)
 
     if value is None:
-        _echo('Nothing found', pre_nl=True)
+        _echo("Nothing found", pre_nl=True)
         sys.exit(1)
 
-    value_placeholders = set(re.findall(r'\$\w+', value))
+    value_placeholders = set(re.findall(r"\$\w+", value))
 
     try:
-        priority_var_map = dict(
-            priority_var.split('=', 1) for priority_var in priority_vars
-        )
+        priority_var_map = dict(priority_var.split("=", 1) for priority_var in priority_vars)
     except ValueError:
         _echo("Passed in ENV-VARs must be in the 'ENVVAR=value' form.")
         sys.exit(1)
@@ -188,58 +185,51 @@ def reset():
 description = "A super mini-utility to store and retrieve random snippets in your terminal!"
 
 # Individual GET Parser
-get_parser = argparse.ArgumentParser(prog='tg', description=description)
-get_parser.add_argument('key', metavar='KEY')
-get_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.', dest='execute', action='store_true')
-get_parser.add_argument('priority_vars', metavar='ENVVAR=value', nargs='*', help='Optional Environment Variables to interpolate into the output.')
+get_parser = argparse.ArgumentParser(prog="tg", description=description)
+get_parser.add_argument("key", metavar="KEY")
+get_parser.add_argument(
+    "-e", "--exec", help="Execute the retrieved value in the current shell.", dest="execute", action="store_true"
+)
+get_parser.add_argument(
+    "priority_vars",
+    metavar="ENVVAR=value",
+    nargs="*",
+    help="Optional Environment Variables to interpolate into the output.",
+)
 
 # Main Parser
-parser = argparse.ArgumentParser(prog='tg', description=description)
+parser = argparse.ArgumentParser(prog="tg", description=description)
 sub_parsers = parser.add_subparsers(metavar="command")
 
 # GET: This sub-parser is never actually used, it only serves to automatically produce documentation for the main parser.
-key_parser = sub_parsers.add_parser(
-    "KEY",
-    help="Retrieve the key's value.",
+key_parser = sub_parsers.add_parser("KEY", help="Retrieve the key's value.")
+key_parser.add_argument("key")
+key_parser.add_argument("-e", "--exec", help="Execute the retrieved value in the current shell.")
+key_parser.add_argument(
+    "priority_vars",
+    metavar="ENVVAR=value",
+    nargs="*",
+    help="Optional Environment Variables to interpolate into the output.",
 )
-key_parser.add_argument('key')
-key_parser.add_argument('-e', '--exec', help='Execute the retrieved value in the current shell.')
-key_parser.add_argument('priority_vars', metavar='ENVVAR=value', nargs='*', help='Optional Environment Variables to interpolate into the output.')
 
 # PUT
-put_parser = sub_parsers.add_parser(
-    "put",
-    help="Store a new key-value pair.",
-)
-put_parser.add_argument(
-    "--key",
-    help="Non-interactive way to set a key.",
-)
-put_parser.add_argument(
-    "--value",
-    help="Non-interactive way to set a value.",
-)
+put_parser = sub_parsers.add_parser("put", help="Store a new key-value pair.")
+put_parser.add_argument("--key", help="Non-interactive way to set a key.")
+put_parser.add_argument("--value", help="Non-interactive way to set a value.")
 put_parser.set_defaults(fn=put)
 
 # DEL
-delete_parser = sub_parsers.add_parser(
-    "del",
-    help="Delete a snippet by it's key",
-)
+delete_parser = sub_parsers.add_parser("del", help="Delete a snippet by it's key")
 delete_parser.add_argument("key")
 delete_parser.set_defaults(fn=delete)
 
 # LS
-ls_parser = sub_parsers.add_parser(
-    "ls",
-    help="See all stored snippets.",
-)
+ls_parser = sub_parsers.add_parser("ls", help="See all stored snippets.")
 ls_parser.set_defaults(fn=ls)
 
 # RESET
 reset_parser = sub_parsers.add_parser(
-    "reset",
-    help="Re-initialize the data-store. This will ERASE any currently stored data, use with care!",
+    "reset", help="Re-initialize the data-store. This will ERASE any currently stored data, use with care!"
 )
 reset_parser.set_defaults(fn=reset)
 
@@ -257,20 +247,13 @@ if __name__ == "__main__":
         os.mkdir(CONFIG_DIR)
 
     if not os.path.exists(CONFIG):
-        with open(CONFIG, 'w') as config_file:
-            config_file.write('[get]\ninterpolate_env_vars=True')
+        with open(CONFIG, "w") as config_file:
+            config_file.write("[get]\ninterpolate_env_vars=True")
 
     args = sys.argv[1:]
 
     if len(args):
-        if args[0] in {
-            "ls",
-            "put",
-            "del",
-            "reset",
-            "-h",
-            "--help",
-        }:
+        if args[0] in {"ls", "put", "del", "reset", "-h", "--help"}:
             main_args = vars(parser.parse_args(args))
             fn = main_args.pop("fn")
             fn(**main_args)
