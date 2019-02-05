@@ -66,9 +66,8 @@ def ls(data):
 
     for key, value in data.items():
         _echo(key, post_nl=False)
-        _echo(DIVIDER)
+        _echo(DIVIDER, post_nl=False)
         _echo(value)
-        _echo("")
 
 
 @access_store
@@ -180,7 +179,7 @@ def _echo(value, pre_nl=False, post_nl=True, flush=False):
     if pre_nl:
         print("echo")
 
-    print('echo "' + value + '"')
+    print("echo '" + value + "'")
 
     if post_nl:
         print("echo")
