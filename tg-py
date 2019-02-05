@@ -32,14 +32,7 @@ config = configparser.SafeConfigParser()
 config.read(CONFIG)
 
 
-# Internal Functions
-def _safe_write(data):
-    with io.open(STORE, "w", encoding="utf8") as outfile:
-        data_str = json.dumps(data, indent=4, separators=(",", ": "))
-        outfile.write(unicode(data_str))
-
-
-def _access_store(fn):
+def access_store(fn):
     """Add a `data` positional arg to the decorated function.
     """
 
@@ -62,42 +55,8 @@ def _access_store(fn):
     return wrapped
 
 
-def _echo(value, pre_nl=False, post_nl=True, flush=False):
-    if pre_nl:
-        print("echo")
-
-    print('echo "' + value + '"')
-
-    if post_nl:
-        print("echo")
-
-    if flush:
-        sys.stdout.flush()
-
-
-def _echo_help(parser):
-    parser.print_help = lambda: _echo(parser.format_help())
-
-
-def _add_get_parser_args(parser):
-    parser.add_argument("key", metavar="KEY")
-    parser.add_argument(
-        "-e",
-        "--exec",
-        help="Execute the retrieved value in the current shell. See 'tg KEY -h' for more info.",
-        dest="execute",
-        action="store_true",
-    )
-    parser.add_argument(
-        "priority_vars",
-        metavar="ENVVAR=value",
-        nargs="*",
-        help="Optional Environment Variables to interpolate into the output. These will take precedence over any ACTUAL env-vars in your current session.",
-    )
-
-
 # Top-Level Functions
-@_access_store
+@access_store
 def ls(data):
     DIVIDER = "-" * 40
 
@@ -110,7 +69,7 @@ def ls(data):
         _echo("")
 
 
-@_access_store
+@access_store
 def get(data, key, execute, priority_vars):
     value = data.get(key)
 
@@ -142,7 +101,7 @@ def get(data, key, execute, priority_vars):
         print(value)
 
 
-@_access_store
+@access_store
 def put(data, key, value):
     if key is None:
         _echo("Key: ", pre_nl=True, post_nl=False, flush=True)
@@ -180,7 +139,7 @@ def put(data, key, value):
     _echo("STORED")
 
 
-@_access_store
+@access_store
 def delete(data, key):
     try:
         value = data.pop(key)
@@ -196,63 +155,112 @@ def delete(data, key):
 
 
 def reset():
-    _echo(
-        "This will ERASE any currently stored data, type 'RESET' to confirm: ", pre_nl=True, post_nl=False, flush=True
-    )
+    _echo("This will ERASE any currently stored data, type 'RESET' to confirm: ", pre_nl=True, post_nl=False, flush=True)
 
     value = input()
 
-    if value == "RESET":
+    if value == 'RESET':
         _safe_write({})
-        _echo("Deleted all stored key-value pairs.", pre_nl=True)
+        _echo('Deleted all stored key-value pairs.', pre_nl=True)
     else:
-        _echo("Aborted.", pre_nl=True)
+        _echo('Aborted.', pre_nl=True)
 
 
-# Main Parser
-description = "A super mini-utility to store and retrieve random snippets in your terminal!"
-
-parser = argparse.ArgumentParser(prog="tg", description=description)
-sub_parsers = parser.add_subparsers(metavar="command")
-
-# GET
-get_parser = argparse.ArgumentParser(prog="tg", description=description)
-_add_get_parser_args(get_parser)
-# NOTE: The `get_help_parser` sub-parser is never actually used, it only serves to automatically produce documentation for the main parser.
-get_help_parser = sub_parsers.add_parser("KEY", help="Retrieve the key's value. See 'tg KEY -h'.")
-_add_get_parser_args(get_help_parser)
-
-# PUT
-put_parser = sub_parsers.add_parser("put", help="Store a new key-value pair.")
-put_parser.add_argument("--key", help="Non-interactive way to set a key.")
-put_parser.add_argument("--value", help="Non-interactive way to set a value.")
-put_parser.set_defaults(fn=put)
-
-# DEL
-delete_parser = sub_parsers.add_parser("del", help="Delete a snippet by it's key")
-delete_parser.add_argument("key")
-delete_parser.set_defaults(fn=delete)
-
-# LS
-ls_parser = sub_parsers.add_parser("ls", help="See all stored snippets.")
-ls_parser.set_defaults(fn=ls)
-
-# RESET
-reset_parser = sub_parsers.add_parser(
-    "reset", help="Re-initialize the data-store. This will ERASE any currently stored data, use with care!"
-)
-reset_parser.set_defaults(fn=reset)
+# Internal Functions
+def _safe_write(data):
+    with io.open(STORE, "w", encoding="utf8") as outfile:
+        data_str = json.dumps(data, indent=4, separators=(",", ": "))
+        outfile.write(unicode(data_str))
 
 
-_echo_help(get_parser)
-_echo_help(parser)
-_echo_help(put_parser)
-_echo_help(delete_parser)
-_echo_help(ls_parser)
-_echo_help(reset_parser)
+def _echo(value, pre_nl=False, post_nl=True, flush=False):
+    if pre_nl:
+        print("echo")
+
+    print('echo "' + value + '"')
+
+    if post_nl:
+        print("echo")
+
+    if flush:
+        sys.stdout.flush()
+
+
+def _create_main_parser(description):
+    # Main Parser
+    main_parser = argparse.ArgumentParser(prog="tg", description=description)
+    _echo_help(main_parser)
+
+    sub_parsers = main_parser.add_subparsers(metavar="command")
+
+    # GET
+    # NOTE: The `get_help_parser` sub-parser is never actually used, it only serves to automatically produce documentation for the main parser.
+    get_help_parser = sub_parsers.add_parser("KEY", help="Retrieve the key's value. See 'tg KEY -h' for more info.")
+    _add_get_parser_args(get_help_parser)
+    _echo_help(get_help_parser)
+
+    # PUT
+    put_parser = sub_parsers.add_parser("put", help="Store a new key-value pair.")
+    put_parser.add_argument("--key", help="Non-interactive way to set a key.")
+    put_parser.add_argument("--value", help="Non-interactive way to set a value.")
+    put_parser.set_defaults(fn=put)
+    _echo_help(put_parser)
+
+    # DEL
+    delete_parser = sub_parsers.add_parser("del", help="Delete a snippet by it's key")
+    delete_parser.add_argument("key")
+    delete_parser.set_defaults(fn=delete)
+    _echo_help(delete_parser)
+
+    # LS
+    ls_parser = sub_parsers.add_parser("ls", help="See all stored snippets.")
+    ls_parser.set_defaults(fn=ls)
+    _echo_help(ls_parser)
+
+    # RESET
+    reset_parser = sub_parsers.add_parser(
+        "reset", help="Re-initialize the data-store. This will ERASE any currently stored data, use with care!"
+    )
+    reset_parser.set_defaults(fn=reset)
+    _echo_help(reset_parser)
+
+    return main_parser
+
+
+def _create_get_parser(description):
+    get_parser = argparse.ArgumentParser(prog="tg", description=description)
+    _add_get_parser_args(get_parser)
+    _echo_help(get_parser)
+
+    return get_parser
+
+
+def _add_get_parser_args(parser):
+    parser.add_argument("key", metavar="KEY")
+    parser.add_argument(
+        "-e",
+        "--exec",
+        help="Execute the retrieved value in the current shell.",
+        dest="execute",
+        action="store_true",
+    )
+    parser.add_argument(
+        "priority_vars",
+        metavar="ENVVAR=value",
+        nargs="*",
+        help="Optional Environment Variables to interpolate into the output. These will take precedence over any ACTUAL env-vars in your current session.",
+    )
+
+
+def _echo_help(parser):
+    parser.print_help = lambda: _echo(parser.format_help())
 
 
 if __name__ == "__main__":
+    description = "A super mini-utility to store and retrieve random snippets in your terminal!"
+    main_parser = _create_main_parser(description)
+    get_parser = _create_get_parser(description)
+
     if not os.path.isdir(CONFIG_DIR):
         os.mkdir(CONFIG_DIR)
 
@@ -264,15 +272,15 @@ if __name__ == "__main__":
 
     if len(args):
         if args[0] in {"ls", "put", "del", "reset", "-h", "--help"}:
-            main_args = vars(parser.parse_args(args))
-            fn = main_args.pop("fn")
-            fn(**main_args)
+            parsed_args = vars(main_parser.parse_args(args))
+            fn = parsed_args.pop("fn")
+            fn(**parsed_args)
             sys.exit()
 
-        get_args = vars(get_parser.parse_args(args))
-        get(**get_args)
+        parsed_args = vars(get_parser.parse_args(args))
+        get(**parsed_args)
         sys.exit()
 
     else:
-        parser.print_help()
+        main_parser.print_help()
         sys.exit(1)
