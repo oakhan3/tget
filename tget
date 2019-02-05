@@ -2,6 +2,8 @@
 
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import argparse
 import json
 import os
@@ -10,17 +12,21 @@ import io
 import functools
 
 if sys.version_info[0] < 3:
+    import ConfigParser as configparser
     input = raw_input  # noqa:F821
-    to_unicode = unicode  # noqa:F821
 else:
-    to_unicode = str
+    import configparser
+    unicode = str
 
 
 # Dirs
 HOME_DIR = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(HOME_DIR, ".tget")
-CONFIG = os.path.join(CONFIG_DIR, "config.toml")
+CONFIG = os.path.join(CONFIG_DIR, "config.cfg")
 STORE = os.path.join(CONFIG_DIR, "store.json")
+
+config = configparser.SafeConfigParser()
+config.read(CONFIG)
 
 
 # Internal Functions
@@ -31,7 +37,7 @@ def _safe_write(data):
             indent=4,
             separators=(",", ": "),
         )
-        outfile.write(to_unicode(data_str))
+        outfile.write(unicode(data_str))
 
 
 def _access_store(fn):
@@ -186,6 +192,10 @@ reset_parser.set_defaults(fn=reset)
 if __name__ == "__main__":
     if not os.path.isdir(CONFIG_DIR):
         os.mkdir(CONFIG_DIR)
+
+    if not os.path.exists(CONFIG):
+        with open(CONFIG, 'w') as config_file:
+            config_file.write('[get]\ninterpolate_env_vars=True')
 
     args = sys.argv[1:]
 
