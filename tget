@@ -52,9 +52,9 @@ def _access_store(fn):
             with open(STORE) as file_:
                 data = json.load(file_)
         except ValueError:
-            print("\nUnable to access the `store` - the file may be corrupted!")
-            print("To recreate it anew, run the `tg reset` command.")
-            print("Store location: {}".format(STORE))
+            _echo("Unable to access the `store` - the file may be corrupted!", pre_nl=True)
+            _echo("To recreate it anew, run the `tg reset` command.")
+            _echo("Store location: {}".format(STORE))
             sys.exit(1)
 
         return fn(data, *args, **kwargs)
@@ -62,14 +62,35 @@ def _access_store(fn):
     return wrapped
 
 
+def _echo(value, pre_nl=False, post_nl=True, flush=False):
+    if pre_nl:
+        print('echo')
+
+    print('echo "' + value + '"')
+
+    if post_nl:
+        print('echo')
+
+    if flush:
+        sys.stdout.flush()
+
+
+def _echo_help(parser):
+    parser.print_help = lambda: _echo(parser.format_help())
+
+
 # Top-Level Functions
 @_access_store
 def ls(data):
     DIVIDER = "-" * 40
 
+    _echo("")
+
     for key, value in data.items():
-        print("\n" + key + "\n" + DIVIDER)
-        print(value)
+        _echo(key, post_nl=False)
+        _echo(DIVIDER)
+        _echo(value)
+        _echo("")
 
 
 @_access_store
@@ -77,23 +98,24 @@ def get(data, key):
     value = data.get(key)
 
     if value is None:
-        print("\nNothing found")
+        _echo('Nothing found', pre_nl=True)
         sys.exit(1)
 
-    print("\n" + value)
+    _echo(value, pre_nl=True)
 
 
 @_access_store
 def put(data, key, value):
     if key is None:
-        key = input("Key: ")
+        _echo("Key: ", post_nl=False, flush=True)
+        key = input()
 
     if not key:
-        print("\nBad Key!")
+        _echo("Bad Key!", pre_nl=True)
         sys.exit(1)
 
     if value is None:
-        print("Value: (Hit <ENTER> twice to end input)\n")
+        _echo("Value: (Hit <ENTER> twice to end input)", pre_nl=True, post_nl=True, flush=True)
         value = ""
         current_value = None
         previous_value = None
@@ -110,14 +132,14 @@ def put(data, key, value):
         value = value[:-2]
 
     if not value:
-        print("Bad Value!")
+        _echo("Bad Value!")
         sys.exit(1)
 
     data[key] = value.strip()
 
     _safe_write(data)
 
-    print("STORED")
+    _echo("STORED")
 
 
 @_access_store
@@ -125,12 +147,14 @@ def delete(data, key):
     try:
         value = data.pop(key)
     except KeyError:
-        print("\nNothing found")
+        _echo("Nothing found", pre_nl=True)
         sys.exit(1)
 
     _safe_write(data)
 
-    print("\nThe following value (with key `" + key + "`) was deleted:\n\n" + value)
+    _echo("The following was deleted:", pre_nl=True)
+    _echo("Key: " + key)
+    _echo("Value:\n " + value)
 
 
 def reset():
