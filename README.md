@@ -39,11 +39,8 @@ Enter `tget`:
 
     # Execute the value
     $ tg pyv3 -e
-    Using base prefix '/../.pyenv/versions/3.6.4'
+    ...
     New python executable in /../.pyenv/versions/3.6.4/envs/example/bin/python3.6
-    Also creating executable in /../.pyenv/versions/3.6.4/envs/example/bin/python
-    Installing setuptools, pip, wheel...
-    done.
     ...
     ```
 
@@ -68,24 +65,16 @@ Enter `tget`:
 
     # Execute the value with interpolated env-vars
     $ NAME=demo tg pyv3 -e
-    Using base prefix '/../.pyenv/versions/3.6.4'
-    New python executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python3.6
-    Also creating executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python
-    Installing setuptools, pip, wheel...
-    done.
     ...
-
+    New python executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python3.6
+    ...
     (demo) $
 
     # ENVVAR=value pairs can also be placed at the end of the command
     $ tg pyv3 -e NAME=demo
-    Using base prefix '/../.pyenv/versions/3.6.4'
-    New python executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python3.6
-    Also creating executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python
-    Installing setuptools, pip, wheel...
-    done.
     ...
-
+    New python executable in /../.pyenv/versions/3.6.4/envs/demo/bin/python3.6
+    ...
     (demo) $
     ```
 
