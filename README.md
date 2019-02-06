@@ -138,6 +138,13 @@ Enter `tget`:
     ñ
     ```
 
+* Search all Key/Values
+
+    *This feature requires [fzf](https://github.com/junegunn/fzf)*
+
+    ![Search Example in resources folder](https://raw.githubusercontent.com/oakhan3/tget/master/resources/search-example.png)
+
+
 * See all Values
 
     ```bash
@@ -182,8 +189,6 @@ Enter `tget`:
 
 * configuration
 * Interactive deleter
-* `ls` sort
-* `ls` search
 * `upgrade` command
 * `import`, `export` commands
 * `uninstall` command

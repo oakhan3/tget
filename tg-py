@@ -9,6 +9,7 @@ import functools
 import io
 import json
 import os
+import platform
 import re
 import sys
 
@@ -22,7 +23,6 @@ else:
     unicode = str
 
 
-# Dirs
 HOME_DIR = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(HOME_DIR, ".tget")
 CONFIG = os.path.join(CONFIG_DIR, "config.cfg")
@@ -31,8 +31,10 @@ STORE = os.path.join(CONFIG_DIR, "store.json")
 config = configparser.SafeConfigParser()
 config.read(CONFIG)
 
-TOP_LEVEL_COMMANDS = {"ls", "put", "del", "reset", "-h", "--help"}
+TOP_LEVEL_COMMANDS = {"ls", "search", "put", "del", "reset", "-h", "--help"}
 PROTECTED_COMMANDS = TOP_LEVEL_COMMANDS.union({"KEY"})
+
+OS = platform.system()
 
 
 def access_store(fn):
@@ -64,10 +66,28 @@ def ls(data):
 
     _echo("")
 
-    for key, value in data.items():
+    for key in sorted(data.keys()):
         _echo(key, post_nl=False)
         _echo(DIVIDER, post_nl=False)
-        _echo(value)
+        _echo(data[key])
+
+
+@access_store
+def search(data):
+    keys = sorted(data.keys())
+    echo_keys = 'echo "' + "\n".join(keys) + '"'
+
+    show_available_keys = (
+        r"fzf --header='Select the key' --height 45% --reverse --preview 'tg {}' --preview-window right:60%"
+    )
+    surround_key = "sed 's/.*/tg & /'"
+    trim_nl = r"tr -d '\n'"
+    copy_to_clipboard = "pbcopy" if OS == "Darwin" else "xclip"
+
+    statment = " | ".join((echo_keys, show_available_keys, surround_key, trim_nl, copy_to_clipboard))
+
+    print(statment)
+    _echo("Copied to your clipboard!", pre_nl=True)
 
 
 @access_store
@@ -218,6 +238,11 @@ def _create_main_parser(description):
     ls_parser = sub_parsers.add_parser("ls", help="See all stored snippets.")
     ls_parser.set_defaults(fn=ls)
     _echo_help(ls_parser)
+
+    # SEARCH
+    search_parser = sub_parsers.add_parser("search", help="Search all stored snippets.")
+    search_parser.set_defaults(fn=search)
+    _echo_help(search_parser)
 
     # RESET
     reset_parser = sub_parsers.add_parser(
