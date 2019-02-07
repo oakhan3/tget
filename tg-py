@@ -83,7 +83,7 @@ def search(data):
     echo_keys = 'echo "' + "\n".join(keys) + '"'
 
     show_available_keys = (
-        r"fzf --header='Select the key' --height 45% --reverse --preview 'tg {}' --preview-window right:60%"
+        r"fzf --header='Select the key' --height 50% --reverse --preview 'tg-py {} | source /dev/stdin' --preview-window right:60%"
     )
     surround_key = "sed 's/.*/tg & /'"
     trim_nl = r"tr -d '\n'"
