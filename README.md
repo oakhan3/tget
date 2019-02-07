@@ -21,7 +21,7 @@ Enter `tget`:
 
     ```bash
     # Store the value
-    $ tg put --key hello --value world
+    $ tg put hello --value world
     STORED
 
     # Retrieve the value
@@ -34,7 +34,7 @@ Enter `tget`:
 
     ```bash
     # Store the value
-    $ tg put --key pyv3 --value "pyenv virtualenv 3.6.4 example"
+    $ tg put pyv3 --value "pyenv virtualenv 3.6.4 example"
     STORED
 
     # Execute the value
@@ -48,9 +48,7 @@ Enter `tget`:
 
     ```bash
     # Store the value
-    $ tg put
-    Key:
-    pyv3
+    $ tg put pyv3
 
     Value: (Hit <ENTER> twice to end input)
 
@@ -81,10 +79,8 @@ Enter `tget`:
 * Store/Retrieve Multi-line
 
     ```bash
-    $ tg put
+    $ tg put cow
 
-    Key:
-    cow
     Value: (Hit <ENTER> twice to end input)
     _________________________________________________
     /                                                 \
@@ -118,7 +114,7 @@ Enter `tget`:
 
     ```bash
     # Store the value
-    $ tg put --key tilde-n --value ñ
+    $ tg put tilde-n --value ñ
     STORED
 
     # Retrieve the value
