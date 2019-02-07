@@ -22,6 +22,11 @@ else:
 
     unicode = str
 
+try:
+    from shlex import quote
+except ImportError:
+    from pipes import quote
+
 
 HOME_DIR = os.path.expanduser("~")
 CONFIG_DIR = os.path.join(HOME_DIR, ".tget")
@@ -199,7 +204,7 @@ def _echo(value, pre_nl=False, post_nl=True, flush=False):
     if pre_nl:
         print("echo")
 
-    print("echo '" + value + "'")
+    print("echo " + quote(value))
 
     if post_nl:
         print("echo")
