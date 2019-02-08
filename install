@@ -23,6 +23,7 @@ tg() {
     tg-py "$@" | source /dev/stdin
 }
 """
+ADDED_TEMPLATE = "The following has been added to `{}`:\n{}"
 
 
 if __name__ == "__main__":
@@ -45,22 +46,23 @@ if __name__ == "__main__":
             break
 
     if shell_config_path:
-        with open(shell_config_path, "a") as shell_config:
-            shell_config.write(SHELL_FN)
-            print("Added the following to your `{}`:\n{}".format(shell_config_path, SHELL_FN))
+        shell_config = open(shell_config_path, "r").read()
+
+        with open(shell_config_path, "a") as shell_config_buffer:
+            if SHELL_FN not in shell_config:
+                shell_config_buffer.write(SHELL_FN)
+                print(ADDED_TEMPLATE.format(shell_config_path, SHELL_FN))
 
             if EXPANDED_INSTALL_PATH not in ENV_PATHS:
-                shell_config.write(PATH_EXPORT)
-                print("Added the following to your `{}`:\n{}".format(shell_config_path, PATH_EXPORT))
-
-        print("Installed, try a `tg` command right away!")
+                shell_config_buffer.write(PATH_EXPORT)
+                print(ADDED_TEMPLATE.format(shell_config_path, PATH_EXPORT))
 
     else:
         print(
-            "Add the following to your shell config file (.bashrc, .bash_profile...) "
-            "to enable the `tg` command throughout:{}{}".format(PATH_EXPORT, SHELL_FN)
+            "Make sure to ADD THE FOLLOWING TO YOUR SHELL CONFIG FILE (.bashrc, .bash_profile...) "
+            "to enable the `tg` command:{}{}".format(PATH_EXPORT, SHELL_FN)
         )
 
-        print("Make sure to restart your shell to enable `tg` commands!")
+    print("\nMake sure to restart your shell to enable `tg` commands!")
 
     sys.exit()

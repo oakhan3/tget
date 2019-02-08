@@ -36,7 +36,7 @@ STORE = os.path.join(CONFIG_DIR, "store.json")
 config = configparser.SafeConfigParser()
 config.read(CONFIG)
 
-TOP_LEVEL_COMMANDS = {"ls", "search", "put", "del", "reset", "-h", "--help"}
+TOP_LEVEL_COMMANDS = {"ls", "search", "put", "del", "update", "reset", "-h", "--help"}
 PROTECTED_COMMANDS = TOP_LEVEL_COMMANDS.union({"KEY"})
 
 OS = platform.system()
@@ -177,6 +177,12 @@ def delete(data, key):
     _echo("Value:\n " + value)
 
 
+def update():
+    print('curl https://raw.githubusercontent.com/oakhan3/tget/master/install | python')
+
+    _echo("Updated!.", pre_nl=True)
+
+
 def reset():
     _echo("This will ERASE any currently stored data, type RESET to confirm: ", pre_nl=True, post_nl=False, flush=True)
 
@@ -244,6 +250,11 @@ def _create_main_parser(description):
     search_parser = sub_parsers.add_parser("search", help="Search all stored snippets.")
     search_parser.set_defaults(fn=search)
     _echo_help(search_parser)
+
+    # UPDATE
+    update_parser = sub_parsers.add_parser("update", help="Update tg!")
+    update_parser.set_defaults(fn=update)
+    _echo_help(update_parser)
 
     # RESET
     reset_parser = sub_parsers.add_parser(
