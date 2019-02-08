@@ -36,7 +36,7 @@ STORE = os.path.join(CONFIG_DIR, "store.json")
 config = configparser.SafeConfigParser()
 config.read(CONFIG)
 
-TOP_LEVEL_COMMANDS = {"ls", "search", "put", "del", "update", "reset", "-h", "--help"}
+TOP_LEVEL_COMMANDS = {"ls", "search", "put", "del", "update", "reset", "uninstall", "-h", "--help"}
 PROTECTED_COMMANDS = TOP_LEVEL_COMMANDS.union({"KEY"})
 
 OS = platform.system()
@@ -195,6 +195,16 @@ def reset():
         _echo("Aborted.", pre_nl=True)
 
 
+def uninstall():
+    executable_dir = os.path.join(HOME_DIR, ".local/bin/tg-py")
+    print('yes | rm {}'.format(executable_dir))
+
+    _echo("Make sure to:", pre_nl=True)
+    _echo(" - Delete your configuration located at: '{}'".format(CONFIG_DIR))
+    _echo(" - Delete the 'tg' function in your shell config file.")
+    _echo("Successfully uninstalled 'tg'")
+
+
 # Internal Functions
 def _safe_write(data):
     with io.open(STORE, "w", encoding="utf8") as outfile:
@@ -262,6 +272,11 @@ def _create_main_parser(description):
     )
     reset_parser.set_defaults(fn=reset)
     _echo_help(reset_parser)
+
+    # UNINSTALL
+    uninstall_parser = sub_parsers.add_parser("uninstall")
+    uninstall_parser.set_defaults(fn=uninstall)
+    _echo_help(uninstall_parser)
 
     return main_parser
 
