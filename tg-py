@@ -82,16 +82,20 @@ def search(data):
     keys = sorted(data.keys())
     echo_keys = 'echo "' + "\n".join(keys) + '"'
 
-    show_available_keys = (
-        r"fzf --header='Select the key' --height 50% --reverse --preview 'tg-py {} | source /dev/stdin' --preview-window right:60%"
+    fzf_height = r"50%"
+    fzf_preview_command = r"tg-py {} | source /dev/stdin"
+    fzf_preview_window = r"right:60%"
+    show_available_keys = "fzf --header='Select the key' --height {} --reverse --preview '{}' --preview-window {}".format(
+        fzf_height, fzf_preview_command, fzf_preview_window
     )
+
     surround_key = "sed 's/.*/tg & /'"
     trim_nl = r"tr -d '\n'"
     copy_to_clipboard = "pbcopy" if OS == "Darwin" else "xclip"
 
-    statment = " | ".join((echo_keys, show_available_keys, surround_key, trim_nl, copy_to_clipboard))
+    statement = " | ".join((echo_keys, show_available_keys, surround_key, trim_nl, copy_to_clipboard))
 
-    print(statment)
+    print(statement)
     _echo("Copied to your clipboard!", pre_nl=True)
 
 
@@ -178,7 +182,7 @@ def delete(data, key):
 
 
 def update():
-    print('curl https://raw.githubusercontent.com/oakhan3/tget/master/install | python')
+    print("curl https://raw.githubusercontent.com/oakhan3/tget/master/install | python")
 
     _echo("Updated!.", pre_nl=True)
 
@@ -197,7 +201,7 @@ def reset():
 
 def uninstall():
     executable_dir = os.path.join(HOME_DIR, ".local/bin/tg-py")
-    print('yes | rm {}'.format(executable_dir))
+    print("yes | rm {}".format(executable_dir))
 
     _echo("Make sure to:", pre_nl=True)
     _echo(" - Delete your configuration located at: '{}'".format(CONFIG_DIR))
